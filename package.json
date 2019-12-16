@@ -1,0 +1,37 @@
+{
+  "name": "bcevents",
+  "version": "0.1.0",
+  "description": "Event emitter using blockchain transations",
+  "main": "index.js",
+  "author": "tlr",
+  "scripts": {
+    "start": "nodemon index.js",
+    "build": "browserify index.js --s bcevents > dist/bcevents.js && uglifyjs dist/bcevents.js > dist/bcevents.min.js"
+  },
+  "keywords": [
+    "bsv",
+    "bitcoin",
+    "blockchain",
+    "cryptocurrency",
+    "event",
+    "events",
+    "event-emitter"
+  ],
+  "license": "MIT",
+  "unpkg": "dist/bcevents.min.js",
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "eventsource": "^1.0.7"
+  },
+  "peerDependencies": {
+    "datapay": "0.0.18",
+    "bsv": "0.27.1"
+  },
+  "devDependencies": {
+    "uglify-es": "^3.3.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiagolr/bcevents.git"
+  }
+}
