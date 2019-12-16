@@ -1,11 +1,12 @@
 {
   "name": "bcevents",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Event emitter using blockchain transations",
   "main": "index.js",
   "author": "tlr",
   "scripts": {
     "start": "nodemon index.js",
+    "test": "mocha --timeout 10000",
     "build": "browserify index.js --s bcevents > dist/bcevents.js && uglifyjs dist/bcevents.js > dist/bcevents.min.js"
   },
   "keywords": [
@@ -28,6 +29,8 @@
     "bsv": "0.27.1"
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
+    "mocha": "^6.2.2",
     "uglify-es": "^3.3.9"
   },
   "repository": {

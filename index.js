@@ -18,7 +18,7 @@ module.exports = function ({
   this.rpc = rpc || 'https://api.bitindex.network'
   this.network = network || 'https://genesis.bitdb.network/s/1FnauZ9aUH2Bex6JzdcV4eNX7oLSSEbxtN/'
   this.fee = fee || 1000
-  this.encKey = encKey && bsv.PrivateKey(bsv.crypto.Hash.sha256sha256(Buffer.from(encKey)).toString('hex'))
+  this.encKey = encKey && datapay.bsv.PrivateKey(datapay.bsv.crypto.Hash.sha256sha256(Buffer.from(encKey)).toString('hex'))
   this.encrypt = encrypt || (this.encKey ? data => AESencrypt(data, this.encKey) : data => data)
   this.decrypt = decrypt || (this.encKey ? data => AESdecrypt(data, this.encKey) : data => data)
 
@@ -36,10 +36,11 @@ module.exports = function ({
     datapay.send({
       data,
       pay: {
-        key: this.pkey,
-        rpc: this.rpc,
-        fee: this.fee,
-      }
+        key: opts.pkey || this.pkey,
+        rpc: opts.rpc || this.rpc,
+        fee: opts.fee || this.fee,
+        to: opts.to || []
+      },
     }, (err, tx) => {
       if (err) throw err
       if (cb) cb(tx)
@@ -61,7 +62,7 @@ module.exports = function ({
         }
       }
       const req = Buffer.from(JSON.stringify(query)).toString('base64')
-      this.sockets[event] = new EventSource(this.network + req)
+      this.sockets[event] = new EventSource((this.network || opts.network) + req)
       this.sockets[event].addEventListener('message', (e) => {
         e.parsed = JSON.parse(e.data)
         e.event = this.decrypt(e.parsed.data[0] && e.parsed.data[0].out[0].s2)
@@ -73,10 +74,14 @@ module.exports = function ({
           //
         }
         (this.listeners[e.event] || []).slice().forEach((listener, i) => {
-          listener.cb(e)
           if (listener.opts.once) {
             this.listeners[e.event].splice(i, 1)
+            if (!this.listeners[event].length && this.sockets[event]) {
+              this.sockets[event].close()
+              this.sockets[event] = undefined
+            }
           }
+          listener.cb(e)
         })
       })
     }
@@ -88,11 +93,28 @@ module.exports = function ({
     const index = this.listeners[event].findIndex(e => e.cb === cb)
     if (index > -1) {
       this.listeners[event].splice(index, 1)
-      if (!this.listeners[event].length && this.sockets[event]) {
-        this.sockets[event].close()
-        this.sockets[event] = undefined
+      if (!this.listeners[event].length) {
+        this.listeners[event] = null
+        if (this.sockets[event]) {
+          this.sockets[event].close()
+          this.sockets[event] = undefined
+        }
       }
     }
+  }
+
+  // closes any open sockets and listeners
+  this.close = () => {
+    Object.keys(this.sockets).forEach(key => {
+      const socket = this.sockets[key]
+      if (socket) {
+        this.sockets[key].close()
+        this.sockets[key] = undefined
+      }
+    })
+    Object.keys(this.listeners).forEach(key => {
+      this.listeners[key] = undefined
+    })
   }
 }
 
