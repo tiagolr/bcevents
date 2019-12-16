@@ -14,7 +14,7 @@ npm install bcevents datapay bsv
 var Emitter = require('bcevents')
 var emitter = new Emitter({ pkey: 'private key for tx fees' })
 
-emitter.on('my-event', console.log) // prints 1234
+emitter.on('my-event', console.log) // prints { ..., payload: 1234 }
 emitter.emit('my-event', 1234, console.log) // prints tx hash
 ```
 
