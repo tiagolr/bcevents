@@ -65,7 +65,7 @@ var emitter = new Emitter({ pkey: 'client pkey', protocol: 'pingpongtest' })
 emitter.on('pong', () => {
   emitter.emit('ping')
 })
-emitter.emit('ping')
+emitter.emit('ping').then(console.log)
 ```
 
 ### Whitelisting
@@ -76,6 +76,6 @@ emitter.on('some-event', (e) {
   if (!whitelist.includes(e.from)) {
     return
   }
-  //
+  // ...
 })
 ```
