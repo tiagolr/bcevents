@@ -22,7 +22,7 @@ module.exports = function ({
   this.encrypt = encrypt || (this.encKey ? data => AESencrypt(data, this.encKey) : data => data)
   this.decrypt = decrypt || (this.encKey ? data => AESdecrypt(data, this.encKey) : data => data)
 
-  this.emit = (event, payload, cb, opts = {}) => {
+  this.emit = (event, payload, cb, opts = {}) => new Promise((resolve, reject) => {
     if (!this.pkey) {
       throw new Error('cannot emit event, private key not defined')
     }
@@ -42,10 +42,13 @@ module.exports = function ({
         to: opts.to || []
       },
     }, (err, tx) => {
-      if (err) throw err
+      if (err) {
+        return reject(err)
+      }
       if (cb) cb(tx)
+      resolve(tx)
     })
-  }
+  })
 
   this.listeners = {}
   this.sockets = {}
